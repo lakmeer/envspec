@@ -1,0 +1,370 @@
+#!/bin/sh
+
+# Setup
+
+clear
+echo "\nEnvSpec: Running tests...\n"
+
+
+# Helper functions
+
+function execute {
+  eval ../make-env $1 $2 $3
+}
+
+function reset {
+  rm -f .envspec
+  rm -f .env
+  rm -f .env.bak
+}
+
+
+#
+# TEST 1: Missing .envspec should exit with error code 1
+#
+
+echo "[ #1]: Stop if .envspec file is missing"; {
+  reset
+  execute
+} > /dev/null 2>&1
+
+# Fail if error code is not 1
+if [ $? -ne 1 ]; then
+  echo "  FAIL: Expected exit code 1"
+fi
+
+
+#
+# TEST 2: .env file should get generated
+#
+
+echo "[ #2]: Creates new envfile if not there"; {
+  reset
+  echo "" > .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env file is not created
+if [ ! -f .env ]; then
+  echo "  FAIL: Expected .env file to exist"
+fi
+
+
+#
+# TEST 3: An existing .env should be backed up
+#
+
+echo "[ #3]: Backs up envfile if it exists"; {
+  reset
+  echo "" > .envspec
+  cp specs/3.env .env
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env.bak is not created
+if [ ! -f .env.bak ]; then
+  echo "  FAIL: Expected .env.bak to exist"
+fi
+
+# Fail if .env.bak does not match reference
+if ! cmp -s .env.bak specs/3.env; then
+  echo "  FAIL: Expected .env.bak to match specs/3.env"
+  exit 1
+fi
+
+
+#
+# TEST 4: Error if .envspec file is empty
+#
+
+echo "[ #4]: Creates blank envfile is spec is blank"; {
+  reset
+  echo "" > .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env is not empty
+if [ ! -s .env ]; then
+  echo "  FAIL: Expected .env to be empty"
+  echo "ENV CONTENT:"
+  cat .env
+fi
+
+
+#
+# TEST 5: Created envfile should copy blank lines from the spec
+#
+
+echo "[ #5]: Preserves blank lines from specfile"; {
+  reset
+  cp specs/5.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/5.env; then
+  echo "  FAIL: Expected .env to match specs/5.env"
+  diff .env specs/5.env
+fi
+
+
+#
+# TEST 6: Created envfile should copy comment lines from the spec
+#
+
+echo "[ #6]: Preserve comments from specfile"; {
+  reset
+  cp specs/6.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/6.env; then
+  echo "  FAIL: Expected .env to match specs/6.env"
+  diff .env specs/6.env
+fi
+
+
+#
+# TEST 7: Lines with no = that aren't comments should error out
+#
+
+echo "[ #7]: Stop if a non-comment line has no '='"; {
+  reset
+  cp specs/7.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if error code isn't 1
+if [ $? -ne 1 ]; then
+  echo "  FAIL: Expected exit code 1"
+fi
+
+
+#
+# TEST 8: Created envfile should copy variables with defaults from the spec
+#
+
+echo "[ #8]: Created envfile should copy default variables from the spec"; {
+  reset
+  cp specs/8.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/8.env; then
+  echo "  FAIL: Expected .env to match specs/7.env"
+  diff .env specs/7.env
+fi
+
+
+#
+# TEST 9: Copied values should have quotes applied if they are not there
+#
+
+echo "[ #9]: Copied values should get quotes"; {
+  reset
+  cp specs/9.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/9.env; then
+  echo "  FAIL: Expected .env to match specs/9.env"
+  diff .env specs/9.env
+fi
+
+
+#
+# TEST 10: Copied values can have spaces
+#
+
+echo "[#10]: Copied values can have spaces"; {
+  reset
+  cp specs/10.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/10.env; then
+  echo "  FAIL: Expected .env to match specs/10.env"
+  diff .env specs/10.env
+fi
+
+
+#
+# TEST 11: Program removes trailing whitespace from values
+#
+
+echo "[#11]: Removes trailing whitespace from values"; {
+  reset
+  cp specs/11.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/11.env; then
+  echo "  FAIL: Expected .env to match specs/11.env"
+  diff .env specs/11.env
+fi
+
+
+#
+# TEST 12: Program accepts lines with spaces around the =, but collapses them in the output
+#
+
+echo "[#12]: Program accepts ' = ' but collapses it"; {
+  reset
+  cp specs/12.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/12.env; then
+  echo "  FAIL: Expected .env to match specs/12.env"
+  diff .env specs/12.env
+fi
+
+
+#
+# TEST 13: Program removes tab characters
+#
+
+echo "[#13]: Program accepts but removes tab characters"; {
+  reset
+  cp specs/13.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/13.env; then
+  echo "  FAIL: Expected .env to match specs/13.env"
+  diff .env specs/13.env
+fi
+
+
+#
+# TEST 14: Missing environment value throws an error
+#
+
+echo "[#14]: Missing environment value throws an error"; {
+  reset
+  cp specs/14.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if error code isn't 1
+if [ $? -ne 1 ]; then
+  echo "  FAIL: Expected exit code 1"
+fi
+
+
+#
+# TEST 15: Program finds and uses values from the environment
+#
+
+echo "[#15]: Program finds and uses values from the environment"; {
+  reset
+  cp specs/15.spec .envspec
+  EXPECTED_VALUE="expected" execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/15.env; then
+  echo "  FAIL: Expected .env to match specs/15.env"
+  diff .env specs/15.env
+fi
+
+
+#
+# TEST 16: Matching values from the environment will override defaults
+#
+
+echo "[#16]: Environment values override default values"; {
+  reset
+  cp specs/16.spec .envspec
+  EXPECTED_VALUE="overridden" execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/16.env; then
+  echo "  FAIL: Expected .env to match specs/16.env"
+  diff .env specs/16.env
+fi
+
+
+#
+# TEST 17: Program preserves blank default values if they are quoted
+#
+
+echo "[#17]: Preserve blank values in quotes"; {
+  reset
+  cp specs/17.spec .envspec
+  execute
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/17.env; then
+  echo "  FAIL: Expected .env to match specs/17.env"
+  cat .env
+  diff .env specs/17.env
+fi
+
+
+#
+# TEST 18: A reasonable sample envfile
+#
+
+echo "[#18]: A reasonable sample envfile"; {
+  reset
+  cp specs/18.spec .envspec
+
+  ENVIRONMENT=staging                         \
+  APP_URL=https://preview.nextbigthing.io     \
+  DB_PASS=N3NfzMYvoABujzJ                     \
+  AWS_SECRET=YaA8gAKXOzzpmCAzTJUsUkfj9M7qJ7b5 \
+  execute
+
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/18.env; then
+  echo "  FAIL: Expected .env to match specs/18.env"
+  diff .env specs/18.env
+fi
+
+
+#
+# TEST 19: A realistic envfile from a real project
+#
+
+echo "[#19]: A realistic envfile from a real project"; {
+  reset
+  cp specs/19.spec .envspec
+
+  ENVIRONMENT=staging                                       \
+  SECURITY_KEY="25DXUEDiLT4FsjEzNGBJhJTat7leBNPQ"           \
+  DB_PASSWORD=bPLMSBdKC3Vp8H8                               \
+  SYSTEM_NAME="Awesome Application [staging]"               \
+  SMTP_USERNAME="029d7bf5-5bed-45d4-bf32-33fd34a6f4b1"      \
+  SMTP_PASSWORD="029d7bf5-5bed-45d4-bf32-33fd34a6f4b1"      \
+  SPACES_SECRET=IzOUGn21msYAAWeXiOd91t1CAepUKMhhLXgX0Cosa2Y \
+  RECAPTCHA_KEY=6LdwxgQhAAAAALhRpF1lcWuIW743nczmkubgt6K2    \
+  STRIPE_SECRET_KEY=sk_test_xLhH7sntJEJFllhPZwbGU0Sj        \
+  execute
+
+} > /dev/null 2>&1
+
+# Fail if .env does not match reference
+if ! cmp -s .env specs/19.env; then
+  echo "  FAIL: Expected .env to match specs/19.env"
+  diff .env specs/19.env
+fi
+
+
+
+# Cleanup
+
+reset
+exit 0
+

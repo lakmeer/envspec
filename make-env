@@ -1,0 +1,86 @@
+#!/bin/sh
+
+SPECFILE=./.envspec
+ENVFILE=./.env
+
+
+# Make sure the envspec file is there
+
+if [ ! -f "$SPECFILE" ]; then
+  echo "ERROR: Could not find .envspec. Stopping."
+  exit 1
+fi
+
+
+# If the envfile already exists, make a backup, otherwise create it
+
+if [ -f "$ENVFILE" ]; then
+  echo "Backing up existing .env file to .env.bak"
+  mv "$ENVFILE" "$ENVFILE.bak"
+fi
+
+touch "$ENVFILE"
+
+
+# Read out each line (set the IFS delimter to nothing to avoid issues with spaces)
+
+while IFS= read line; do
+
+  # Get number of current line
+  LN=$(grep -n "$line" "$SPECFILE" | cut -d: -f1)
+
+  # If the line is blank, make a new blank line in the env
+  if [ -z "$line" ]; then
+    echo "" >> "$ENVFILE"
+  else
+
+    # If the line is a comment, copy the whole line
+    if [[ "$line" =~ ^#.* ]]; then
+      echo "$line" >> "$ENVFILE"
+    else
+
+      # If the line does not contain an =, that's a syntax error
+      if [[ ! "$line" =~ = ]]; then
+        echo "!! Syntax error for key '$KEY' on line $LN: expected '='. Stopping."
+        rm $ENVFILE
+        exit 1
+      fi
+
+      # Split the line on '=' and trim surrounding whitespace with sed
+      KEY=$(   echo "$line" | cut -d'=' -f1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      VALUE=$( echo "$line" | cut -d'=' -f2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+      # Check if the varname is defined in the environment
+      if [ -z "${!KEY}" ]; then
+
+        # Bail if it is not, and also the default value is not set
+        if [ -z "$VALUE" ]; then
+          echo "!! Did not find $KEY in the environment. Stopping."
+          rm $ENVFILE
+          exit 1
+        else
+          echo ".. $KEY: Using default from envspec"
+        fi
+
+      else
+        echo ".. $KEY: OK"
+
+        # Get the value from the environment
+        VALUE="${!KEY}"
+      fi
+
+      # If the value already has quotes around it, strip them before formatting
+      if [[ "$VALUE" =~ ^\".*\"$ ]]; then
+        VALUE=$( echo "$VALUE" | sed 's/^"//' | sed 's/"$//' )
+      fi
+
+      # Write values to envfile
+      echo "$KEY=\"$VALUE\"" >> "$ENVFILE"
+    fi
+
+  fi
+
+done < "$SPECFILE"
+
+echo "$ENVFILE generated."
+
