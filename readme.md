@@ -14,7 +14,7 @@ SECRET_API_KEY=
 ```
 
 ### 2. Fill in sensitive values in your CI pipeline config
-![Example of CI config screen](https://githubusercontent.com/lakmeer/envspec/master/docs/ci-config.png?raw=true)
+![Example of CI config screen](https://github.com/lakmeer/envspec/blob/master/docs/ci-config.png?raw=true)
 
 ### 3. Run `make-env` in your pipeline
 If any variables were not found, you will see clear, concise errors in your logs.
