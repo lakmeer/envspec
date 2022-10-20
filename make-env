@@ -3,11 +3,13 @@
 SPECFILE=./.envspec
 ENVFILE=./.env
 
+echo "EnvSpec running..."
+
 
 # Make sure the envspec file is there
 
 if [ ! -f "$SPECFILE" ]; then
-  echo "ERROR: Could not find .envspec. Stopping."
+  echo "EnvSpec: ERROR: Could not find .envspec. Stopping."
   exit 1
 fi
 
@@ -15,7 +17,7 @@ fi
 # If the envfile already exists, make a backup, otherwise create it
 
 if [ -f "$ENVFILE" ]; then
-  echo "Backing up existing .env file to .env.bak"
+  echo "EnvSpec: Backing up existing .env file to .env.bak"
   mv "$ENVFILE" "$ENVFILE.bak"
 fi
 
@@ -41,7 +43,7 @@ while IFS= read line; do
 
       # If the line does not contain an =, that's a syntax error
       if [[ ! "$line" =~ = ]]; then
-        echo "!! Syntax error for key '$KEY' on line $LN: expected '='. Stopping."
+        echo "EnvSpec: ERROR: Malformed key '$KEY' on line $LN: expected '='. Stopping."
         rm $ENVFILE
         exit 1
       fi
@@ -55,15 +57,19 @@ while IFS= read line; do
 
         # Bail if it is not, and also the default value is not set
         if [ -z "$VALUE" ]; then
-          echo "!! Did not find $KEY in the environment. Stopping."
+          echo "EnvSpec: ERROR: Expected $KEY in the environment but could not find it. Stopping."
           rm $ENVFILE
           exit 1
         else
-          echo ".. $KEY: Using default from envspec"
+          if verbose; then
+            echo "EnvSpec: $KEY - Not found, using default value"
+          fi
         fi
 
       else
-        echo ".. $KEY: OK"
+        if verbose; then
+          echo "EnvSpec: $KEY - OK"
+        fi
 
         # Get the value from the environment
         VALUE="${!KEY}"
@@ -82,5 +88,5 @@ while IFS= read line; do
 
 done < "$SPECFILE"
 
-echo "$ENVFILE generated."
+echo "EnvSpec: Done - $ENVFILE generated."
 

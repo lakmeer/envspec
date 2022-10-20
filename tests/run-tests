@@ -23,7 +23,7 @@ function reset {
 # TEST 1: Missing .envspec should exit with error code 1
 #
 
-echo "[ #1]: Stop if .envspec file is missing"; {
+echo "[ #1]: Error if .envspec file is missing"; {
   reset
   execute
 } > /dev/null 2>&1
@@ -112,7 +112,7 @@ fi
 # TEST 6: Created envfile should copy comment lines from the spec
 #
 
-echo "[ #6]: Preserve comments from specfile"; {
+echo "[ #6]: Preserves comments from specfile"; {
   reset
   cp specs/6.spec .envspec
   execute
@@ -129,7 +129,7 @@ fi
 # TEST 7: Lines with no = that aren't comments should error out
 #
 
-echo "[ #7]: Stop if a non-comment line has no '='"; {
+echo "[ #7]: Errors if a non-comment line has no '='"; {
   reset
   cp specs/7.spec .envspec
   execute
@@ -145,7 +145,7 @@ fi
 # TEST 8: Created envfile should copy variables with defaults from the spec
 #
 
-echo "[ #8]: Created envfile should copy default variables from the spec"; {
+echo "[ #8]: Copies default variables from the spec to the envfile"; {
   reset
   cp specs/8.spec .envspec
   execute
@@ -162,7 +162,7 @@ fi
 # TEST 9: Copied values should have quotes applied if they are not there
 #
 
-echo "[ #9]: Copied values should get quotes"; {
+echo "[ #9]: Applies quotes to copied values"; {
   reset
   cp specs/9.spec .envspec
   execute
@@ -179,7 +179,7 @@ fi
 # TEST 10: Copied values can have spaces
 #
 
-echo "[#10]: Copied values can have spaces"; {
+echo "[#10]: Copies unquoted values containing spaces correctly"; {
   reset
   cp specs/10.spec .envspec
   execute
@@ -213,7 +213,7 @@ fi
 # TEST 12: Program accepts lines with spaces around the =, but collapses them in the output
 #
 
-echo "[#12]: Program accepts ' = ' but collapses it"; {
+echo "[#12]: Accepts ' = ', but collapses it"; {
   reset
   cp specs/12.spec .envspec
   execute
@@ -230,7 +230,7 @@ fi
 # TEST 13: Program removes tab characters
 #
 
-echo "[#13]: Program accepts but removes tab characters"; {
+echo "[#13]: Accepts tab characters, but removes them"; {
   reset
   cp specs/13.spec .envspec
   execute
@@ -247,7 +247,7 @@ fi
 # TEST 14: Missing environment value throws an error
 #
 
-echo "[#14]: Missing environment value throws an error"; {
+echo "[#14]: Errors if specified envars are missing"; {
   reset
   cp specs/14.spec .envspec
   execute
@@ -263,7 +263,7 @@ fi
 # TEST 15: Program finds and uses values from the environment
 #
 
-echo "[#15]: Program finds and uses values from the environment"; {
+echo "[#15]: Finds and uses envars from the environment"; {
   reset
   cp specs/15.spec .envspec
   EXPECTED_VALUE="expected" execute
@@ -280,7 +280,7 @@ fi
 # TEST 16: Matching values from the environment will override defaults
 #
 
-echo "[#16]: Environment values override default values"; {
+echo "[#16]: Overrides default value if matching envar is found"; {
   reset
   cp specs/16.spec .envspec
   EXPECTED_VALUE="overridden" execute
@@ -297,7 +297,7 @@ fi
 # TEST 17: Program preserves blank default values if they are quoted
 #
 
-echo "[#17]: Preserve blank values in quotes"; {
+echo "[#17]: Preserves blank values in quotes"; {
   reset
   cp specs/17.spec .envspec
   execute
@@ -360,7 +360,6 @@ if ! cmp -s .env specs/19.env; then
   echo "  FAIL: Expected .env to match specs/19.env"
   diff .env specs/19.env
 fi
-
 
 
 # Cleanup
