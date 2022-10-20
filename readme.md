@@ -66,7 +66,7 @@ There aren't any options. If you think there should be, send me a pull request.
 - Comments and blank lines are preserved
 - Extraneous whitespace is removed: `KEY = value` will become `KEY="value"`
 
-##### Errors
+#### Errors
 
 - EnvSpec will halt in the following cases:
   - If the `.envspec` file is missing
