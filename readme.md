@@ -39,9 +39,8 @@ SECRET_API_KEY="2d803bd451c77c3c130a4dda46cf0b22"
   - Automatically quotes values and regularizes formatting
 - It's a single bash script
   - Commit it to your repo
-  - Runs anywhere
   - No installer
-  - No external dependancies
+  - Runs anywhere
 
 
 ## Details
@@ -75,6 +74,15 @@ There aren't any options. If you think there should be, send me a pull request.
 - Keys with explicit blank values, like `INTENTIONALLY_BLANK=""`, will not cause an error if not
   found in the environment.
 
+## Todo
+
+- Verbose output flag
+- Flags to disable automatic formatting and quoting
+- More unit tests
+  - Missing key `=value` should throw
+- Do string processing without `sed`
+
+If you would like to help with any of the above items, please send a pull request.
 
 ## Contributing
 
