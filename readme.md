@@ -73,6 +73,7 @@ There aren't any options. If you think there should be, send me a pull request.
   - If a line doesn't contain a `=`, but is also not a comment
 - Keys with explicit blank values, like `INTENTIONALLY_BLANK=""`, will not cause an error if not
   found in the environment.
+- If EnvSpec stops due to an error, the WIP envfile will be deleted.
 
 ## Todo
 
@@ -80,6 +81,11 @@ There aren't any options. If you think there should be, send me a pull request.
 - Flags to disable automatic formatting and quoting
 - More unit tests
   - Missing key `=value` should throw
+  - Flag options
+    - Help text terminates with 0
+    - Colors
+    - Output levels
+    - Loading alternate specfiles
 - Do string processing without `sed`
 
 If you would like to help with any of the above items, please send a pull request.

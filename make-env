@@ -1,5 +1,4 @@
-#!/bin/sh
-#
+#!/bin/bash
 # EnvSpec: make-env
 # Version 0.1.0
 # October 2022
@@ -9,16 +8,69 @@
 #
 # Unlicense
 
+
+# Default Settings
+
 SPECFILE=./.envspec
 ENVFILE=./.env
+VERBOSITY=1   # 0 = minimal, 1 = standard, 2 = verbose
+COLORS=1
 
-echo "EnvSpec running..."
 
+# Flag Options
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)      show-help       ;;
+    -n|--no-colors) export COLORS=0 ;;
+    -o|--outfile)   export ENVFILE="$2"   ; shift ;;
+    -s|--spec)      export SPECFILE="$2"  ; shift ;;
+    -v|--verbosity) export VERBOSITY="$2" ; shift ;;
+    *)  echo "Unsupported option: $1" ; show-help ;;
+  esac
+  shift
+done
+
+
+# Helper functions
+
+function show-help {
+  echo "Usage: make-env [specfile] [options]"
+  echo "Options:"
+  echo "  -h, --help        Show this help message"
+  echo "  -s, --spec        Path to input specfile (default .envspec)"
+  echo "  -o, --outfile     Path to output dotenv file (default .env)"
+  echo "  -v, --verbosity   Set output level: 0=errors, 1=default, 2=debug"
+  echo "  -n, --no-colors   Disable color output"
+  exit 0
+}
+
+
+# Ansi formatting
+
+NC=''
+RED=''
+CYAN=''
+GREEN=''
+BRIGHT=''
+
+if [[ $COLORS -eq 1 ]]; then
+  NC='\033[0m'
+  RED='\033[0;31m'
+  CYAN='\033[0;36m'
+  GREEN='\033[0;32m'
+  BRIGHT='\033[1m'
+fi
+
+
+if [[ $VERBOSITY -ge 1 ]]; then
+  echo -e "EnvSpec: ${CYAN}INFO${NC}: Starting..."
+fi
 
 # Make sure the envspec file is there
 
 if [ ! -f "$SPECFILE" ]; then
-  echo "EnvSpec: ERROR: Could not find .envspec. Stopping."
+  echo -e "EnvSpec: ${RED}ERROR${NC}: Could not find .envspec. Stopping."
   exit 1
 fi
 
@@ -26,11 +78,20 @@ fi
 # If the envfile already exists, make a backup, otherwise create it
 
 if [ -f "$ENVFILE" ]; then
-  echo "EnvSpec: Backing up existing .env file to .env.bak"
+  if [[ $VERBOSITY -ge 1 ]]; then
+    echo -e "EnvSpec: ${CYAN}INFO${NC}: Backing up existing .env file to .env.bak"
+  fi
   mv "$ENVFILE" "$ENVFILE.bak"
 fi
 
 touch "$ENVFILE"
+
+
+# Read the specfile and create the envfile
+
+if [[ $VERBOSITY -ge 2 ]]; then
+  echo -e "EnvSpec: ${CYAN}INFO${NC}: Reading specfile ${BRIGHT}$SPECFILE${NC}"
+fi
 
 
 # Read out each line (set the IFS delimter to nothing to avoid issues with spaces)
@@ -52,8 +113,8 @@ while IFS= read line; do
 
       # If the line does not contain an =, that's a syntax error
       if [[ ! "$line" =~ = ]]; then
-        echo "EnvSpec: ERROR: Malformed key '$KEY' on line $LN: expected '='. Stopping."
-        rm $ENVFILE
+        echo -e "EnvSpec: ${RED}ERROR${NC}: Malformed key ${BRIGHT}'$KEY'${NC} on line $LN: expected '='. Stopping."
+        rm -f $ENVFILE
         exit 1
       fi
 
@@ -66,18 +127,18 @@ while IFS= read line; do
 
         # Bail if it is not, and also the default value is not set
         if [ -z "$VALUE" ]; then
-          echo "EnvSpec: ERROR: Expected $KEY in the environment but could not find it. Stopping."
-          rm $ENVFILE
+          echo -e "EnvSpec: ${RED}ERROR${NC}: Expected ${BRIGHT}$KEY${NC} in the environment but could not find it. Stopping."
+          rm -f $ENVFILE
           exit 1
         else
-          if verbose; then
-            echo "EnvSpec: $KEY - Not found, using default value"
+          if [[ $VERBOSITY -ge 2 ]]; then
+            echo -e "EnvSpec: ${GREEN}OK${NC}: ${BRIGHT}$KEY${NC} not found, using default value"
           fi
         fi
 
       else
-        if verbose; then
-          echo "EnvSpec: $KEY - OK"
+        if [[ $VERBOSITY -ge 1 ]]; then
+          echo -e "EnvSpec: ${GREEN}OK${NC}: ${BRIGHT}$KEY${NC} found in environment."
         fi
 
         # Get the value from the environment
@@ -97,5 +158,8 @@ while IFS= read line; do
 
 done < "$SPECFILE"
 
-echo "EnvSpec: Done - $ENVFILE generated."
+if [[ $VERBOSITY -ge 1 ]]; then
+  echo -e "EnvSpec: ${CYAN}INFO${NC}: $ENVFILE generated."
+fi
+echo -e "EnvSpec: ${GREEN}ALL OK${NC}"
 
