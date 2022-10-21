@@ -159,7 +159,7 @@ while IFS= read line; do
 done < "$SPECFILE"
 
 if [[ $VERBOSITY -ge 1 ]]; then
-  echo -e "EnvSpec: ${CYAN}INFO${NC}: $ENVFILE generated."
+  echo -e "EnvSpec: ${CYAN}INFO${NC}: ${BRIGHT}$ENVFILE${NC} generated."
 fi
 echo -e "EnvSpec: ${GREEN}ALL OK${NC}"
 

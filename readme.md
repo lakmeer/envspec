@@ -58,12 +58,12 @@ SECRET_API_KEY="2d803bd451c77c3c130a4dda46cf0b22"
 #### `-v`, `--verbosity` - default `1`
 
 - 0: Minimal - Only show me errors
-- 1: Default - shows confirmation for each variable
+- 1: Default - shows confirmation for each required variable
 - 2: Copious - tell me every little thing
 
 #### `-n`, `--no-colors`
 
-- Disable ANSI colors in stdout
+- Disable ANSI formatting in stdout
 
 
 ### Notes on default behaviours
