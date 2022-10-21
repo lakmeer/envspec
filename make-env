@@ -1,4 +1,13 @@
 #!/bin/sh
+#
+# EnvSpec: make-env
+# Version 0.1.0
+# October 2022
+#
+# This file is meant to be committed to your version control system.
+# See https://github.com/lakmeer/envspec for updated versions
+#
+# Unlicense
 
 SPECFILE=./.envspec
 ENVFILE=./.env
