@@ -47,7 +47,24 @@ SECRET_API_KEY="2d803bd451c77c3c130a4dda46cf0b22"
 
 ### Options
 
-There aren't any options. If you think there should be, send me a pull request.
+#### `-s`, `--spec` - default `.envspec`
+
+- Choose a different specfile; eg: you may want to keep it out of project root
+
+#### `-o`, `--outfile` - default `.env`
+
+- Choose a different name or location for the output dotenv file
+
+#### `-v`, `--verbosity` - default `1`
+
+- 0: Minimal - Only show me errors
+- 1: Default - shows confirmation for each variable
+- 2: Copious - tell me every little thing
+
+#### `-n`, `--no-colors`
+
+- Disable ANSI colors in stdout
+
 
 ### Notes on default behaviours
 
@@ -86,6 +103,7 @@ There aren't any options. If you think there should be, send me a pull request.
     - Colors
     - Output levels
     - Loading alternate specfiles
+    - Writing alternate envfiles
 - Do string processing without `sed`
 
 If you would like to help with any of the above items, please send a pull request.
